@@ -4,27 +4,23 @@ import os
 import random
 import argparse
 
-
 app = Flask(__name__)
 
 DBHOST = os.environ.get("DBHOST") or "localhost"
 DBUSER = os.environ.get("DBUSER") or "root"
-DBPWD = os.environ.get("DBPWD") or "passwors"
+DBPWD = os.environ.get("DBPWD") or "password"
 DATABASE = os.environ.get("DATABASE") or "employees"
 COLOR_FROM_ENV = os.environ.get('APP_COLOR') or "lime"
-DBPORT = int(os.environ.get("DBPORT"))
+DBPORT = int(os.environ.get("DBPORT", "3306"))
 
 # Create a connection to the MySQL database
 db_conn = connections.Connection(
-    host= DBHOST,
+    host=DBHOST,
     port=DBPORT,
-    user= DBUSER,
-    password= DBPWD, 
-    db= DATABASE
-    
+    user=DBUSER,
+    password=DBPWD, 
+    db=DATABASE
 )
-output = {}
-table = 'employee';
 
 # Define the supported color codes
 color_codes = {
@@ -37,13 +33,11 @@ color_codes = {
     "lime": "#C1FF9C",
 }
 
-
 # Create a string of supported colors
 SUPPORTED_COLORS = ",".join(color_codes.keys())
 
 # Generate a random color
 COLOR = random.choice(["red", "green", "blue", "blue2", "darkblue", "pink", "lime"])
-
 
 @app.route("/", methods=['GET', 'POST'])
 def home():
@@ -61,16 +55,15 @@ def AddEmp():
     primary_skill = request.form['primary_skill']
     location = request.form['location']
 
-  
     insert_sql = "INSERT INTO employee VALUES (%s, %s, %s, %s, %s)"
     cursor = db_conn.cursor()
 
     try:
-        
         cursor.execute(insert_sql,(emp_id, first_name, last_name, primary_skill, location))
         db_conn.commit()
         emp_name = "" + first_name + " " + last_name
-
+    except Exception as e:
+        return f"Error: {str(e)}", 500
     finally:
         cursor.close()
 
@@ -80,7 +73,6 @@ def AddEmp():
 @app.route("/getemp", methods=['GET', 'POST'])
 def GetEmp():
     return render_template("getemp.html", color=color_codes[COLOR])
-
 
 @app.route("/fetchdata", methods=['GET','POST'])
 def FetchData():
@@ -94,16 +86,17 @@ def FetchData():
         cursor.execute(select_sql,(emp_id))
         result = cursor.fetchone()
         
-        # Add No Employee found form
-        output["emp_id"] = result[0]
-        output["first_name"] = result[1]
-        output["last_name"] = result[2]
-        output["primary_skills"] = result[3]
-        output["location"] = result[4]
+        if result:
+            output["emp_id"] = result[0]
+            output["first_name"] = result[1]
+            output["last_name"] = result[2]
+            output["primary_skills"] = result[3]
+            output["location"] = result[4]
+        else:
+            return "Employee not found", 404
         
     except Exception as e:
-        print(e)
-
+        return f"Error: {str(e)}", 500
     finally:
         cursor.close()
 
@@ -133,4 +126,4 @@ if __name__ == '__main__':
         print("Color not supported. Received '" + COLOR + "' expected one of " + SUPPORTED_COLORS)
         exit(1)
 
-    app.run(host='0.0.0.0',port=8080,debug=True)
+    app.run(host='0.0.0.0', port=8080, debug=True)
