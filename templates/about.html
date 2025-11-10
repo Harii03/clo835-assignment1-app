@@ -1,20 +1,17 @@
-<!doctype html>
-<title>Hello from Flask</title>
-<body style="background: {{ color }};"></body>
-<div style="color: #e4e4e4;
-    text-align:  center;
-    height: 90px;
-    vertical-align:  middle;">
-{% if name %}
-  <h1>Hello from {{ name }}!</h1>
-{% else %}
-  <h1>Hello From CLO835!</h1>
-{% endif %}
-
-  {% if contents %}
-  <textarea rows="10" cols="50">
-    {{ contents }}
-  </textarea>
-  {% endif %}
-
-</div>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>About Us</title>
+</head>
+<center>
+    <font color="black" size="4" style="font-family: avenir">
+        <h1 style="color: DodgerBlue">About Our Company</h1>
+        <body style="background: {{ color }};">
+            <p>This is a sample employee database application.</p>
+            <p>Built with Flask, MySQL, and Docker.</p>
+            <br><br>
+            <a href="/">Back to Home</a>
+        </body>
+    </font>
+</center>
+</html>
